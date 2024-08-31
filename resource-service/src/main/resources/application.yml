@@ -1,0 +1,13 @@
+server:
+  port: 8080
+  error:
+    include-stacktrace: never
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  datasource:
+    driverClassName: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:54321/resource
+    username: postgres
+    password: root
