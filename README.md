@@ -11,7 +11,7 @@
       ```
    - The second one with Song Service database:
      ```bash
-     docker run --name pg-song -e POSTGRES_PASSWORD=root -e POSTGRES_DB=song -d -p:54321:5432 postgres
+     docker run --name pg-song -e POSTGRES_PASSWORD=root -e POSTGRES_DB=song -d -p:54322:5432 postgres
      ```
 
 4. Clone the project:
