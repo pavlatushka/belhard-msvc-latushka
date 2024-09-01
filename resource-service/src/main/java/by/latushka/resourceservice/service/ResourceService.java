@@ -14,5 +14,5 @@ public interface ResourceService {
 
     Long uploadMp3File(InputStream is) throws InvalidResourceException;
 
-    void deleteAll(Set<Long> ids);
+    Set<Long> deleteAll(Set<Long> ids);
 }

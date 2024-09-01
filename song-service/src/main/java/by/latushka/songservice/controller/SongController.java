@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -37,7 +36,7 @@ public class SongController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteSong(@RequestParam(required = false) @Size(max = 199) Set<Long> id) {
-        songService.deleteAll(id);
-        return ResponseEntity.ok(Map.of("id", id != null ? id : List.of()));
+        Set<Long> removedIds = songService.deleteAll(id);
+        return ResponseEntity.ok(Map.of("id", removedIds));
     }
 }

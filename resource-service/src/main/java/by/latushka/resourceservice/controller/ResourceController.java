@@ -12,7 +12,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -42,7 +41,7 @@ public class ResourceController {
 
     @DeleteMapping
     public ResponseEntity<?> deleteResource(@RequestParam(required = false) @Size(max = 199) Set<Long> id) {
-        resourceService.deleteAll(id);
-        return ResponseEntity.ok(Map.of("id", id != null ? id : List.of()));
+        Set<Long> removedIds = resourceService.deleteAll(id);
+        return ResponseEntity.ok(Map.of("id", removedIds));
     }
 }

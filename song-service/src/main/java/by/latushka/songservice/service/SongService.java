@@ -10,5 +10,5 @@ public interface SongService {
 
     Long save(SongDto dto);
 
-    void deleteAll(Set<Long> ids);
+    Set<Long> deleteAll(Set<Long> ids);
 }

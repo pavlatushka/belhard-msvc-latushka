@@ -38,10 +38,12 @@ public class SongServiceImpl implements SongService {
 
     @Override
     @Transactional
-    public void deleteAll(Set<Long> ids) {
+    public Set<Long> deleteAll(Set<Long> ids) {
         if(ids == null || ids.isEmpty()) {
-            return;
+            return Set.of();
         }
+        Set<Long> existingIds = songRepository.findExistingIds(ids);
         songRepository.deleteAllByIdInBatch(ids);
+        return existingIds;
     }
 }

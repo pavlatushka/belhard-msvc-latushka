@@ -86,11 +86,13 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     @Transactional
-    public void deleteAll(Set<Long> ids) {
+    public Set<Long> deleteAll(Set<Long> ids) {
         if(ids == null || ids.isEmpty()) {
-            return;
+            return Set.of();
         }
+        Set<Long> existingIds = mp3FileRepository.findExistingIds(ids);
         mp3FileRepository.deleteAllByIdInBatch(ids);
+        return existingIds;
     }
 
     @Transactional
