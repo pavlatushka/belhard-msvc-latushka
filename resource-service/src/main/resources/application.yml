@@ -6,6 +6,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    show-sql: true
   datasource:
     driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://localhost:54321/resource
@@ -20,3 +21,6 @@ song:
         host: localhost
         port: 8081
         endpoint: songs
+logging:
+  level:
+    by.latushka: debug
