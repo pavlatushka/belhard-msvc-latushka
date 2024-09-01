@@ -39,6 +39,7 @@ public class ResourceServiceImpl implements ResourceService {
     public byte[] findById(Long id) throws ResourceNotFoundException {
         Optional<Mp3File> mp3File = mp3FileRepository.findById(id);
         if(mp3File.isEmpty()) {
+            log.info("Resource with id {} not found", id);
             throw new ResourceNotFoundException();
         }
         return unwrapMp3FileData(mp3File.get());
@@ -54,6 +55,7 @@ public class ResourceServiceImpl implements ResourceService {
             try {
                 songServiceClient.saveMetadata(metadata);
             } catch (SongServiceClientException e) { //rollback resource service changes
+                log.error("Auto delete saved Mp3File with id {} due SongService error", mp3FileId, e);
                 mp3FileRepository.deleteById(mp3FileId);
                 mp3FileId = null;
             }
