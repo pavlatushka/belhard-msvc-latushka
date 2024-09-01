@@ -12,6 +12,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.apache.tika.exception.TikaException;
+import org.apache.tika.io.TikaInputStream;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.metadata.Property;
 import org.apache.tika.parser.ParseContext;
@@ -47,8 +48,14 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Long save(InputStream is) throws InvalidResourceException {
-        Mp3FileMetadata metadata = parseMp3FileMetadata(is);
-        Long mp3FileId = uploadMp3File(is);
+        byte[] rawData;
+        try {
+            rawData = is.readAllBytes();
+        } catch (IOException e) {
+            throw new InvalidResourceException(e);
+        }
+        Mp3FileMetadata metadata = parseMp3FileMetadata(rawData);
+        Long mp3FileId = uploadMp3File(rawData);
 
         if (mp3FileId != null) {
             metadata.setResourceId(mp3FileId);
@@ -75,11 +82,11 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Transactional
-    Long uploadMp3File(InputStream is) throws InvalidResourceException {
+    Long uploadMp3File(byte[] data) throws InvalidResourceException {
         SerialBlob blob;
         try {
-            blob = new SerialBlob(is.readAllBytes());
-        } catch (IOException | SQLException e) {
+            blob = new SerialBlob(data);
+        } catch (SQLException e) {
             log.error("Failed to read mp3 file data", e);
             throw new InvalidResourceException(e);
         }
@@ -103,13 +110,13 @@ public class ResourceServiceImpl implements ResourceService {
         }
     }
 
-    private Mp3FileMetadata parseMp3FileMetadata(InputStream is) throws InvalidResourceException {
+    private Mp3FileMetadata parseMp3FileMetadata(byte[] data) throws InvalidResourceException {
         BodyContentHandler handler = new BodyContentHandler();
         Metadata metadata = new Metadata();
         Mp3Parser mp3Parser = new Mp3Parser();
         ParseContext context = new ParseContext();
 
-        try {
+        try (InputStream is = TikaInputStream.get(data)){
             mp3Parser.parse(is, handler, metadata, context);
         } catch (IOException | SAXException | TikaException e) {
             log.error("Failed to parse mp3 file", e);
