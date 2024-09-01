@@ -1,6 +1,5 @@
 package by.latushka.resourceservice.controller;
 
-import by.latushka.resourceservice.dto.Mp3FileMetadata;
 import by.latushka.resourceservice.exception.InvalidResourceException;
 import by.latushka.resourceservice.exception.ResourceNotFoundException;
 import by.latushka.resourceservice.service.ResourceService;
@@ -23,14 +22,10 @@ public class ResourceController {
     private final ResourceService resourceService;
 
     @PostMapping(consumes = "audio/mpeg")
-    public ResponseEntity<?> uploadResource(InputStream is) throws InvalidResourceException {
-        Mp3FileMetadata metadata = resourceService.parseMp3FileMetadata(is);
-        Long mp3FileId = resourceService.uploadMp3File(is);
-
-        //todo send metadata to Song Service
-
+    public ResponseEntity<?> addResource(InputStream is) throws InvalidResourceException {
+        Long resourceId = resourceService.save(is);
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of("id", mp3FileId));
+                .body(Map.of("id", resourceId));
     }
 
     @GetMapping(value = "/{id}", produces = "audio/mpeg")

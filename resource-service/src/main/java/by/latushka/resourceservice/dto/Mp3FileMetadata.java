@@ -7,7 +7,7 @@ import lombok.Data;
 @Data
 public class Mp3FileMetadata {
     private Long resourceId;
-    private String title;
+    private String name;
     private String artist;
     private String album;
     private Double length;

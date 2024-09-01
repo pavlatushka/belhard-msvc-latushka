@@ -11,3 +11,10 @@ spring:
     url: jdbc:postgresql://localhost:54321/resource
     username: postgres
     password: root
+song:
+  service:
+    client:
+        scheme: http
+        host: localhost
+        port: 8081
+        endpoint: songs

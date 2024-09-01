@@ -1,6 +1,8 @@
 package by.latushka.resourceservice.service.impl;
 
+import by.latushka.resourceservice.client.SongServiceClient;
 import by.latushka.resourceservice.dto.Mp3FileMetadata;
+import by.latushka.resourceservice.dto.SongServiceClientException;
 import by.latushka.resourceservice.entity.Mp3File;
 import by.latushka.resourceservice.exception.InvalidResourceException;
 import by.latushka.resourceservice.exception.ResourceNotFoundException;
@@ -31,6 +33,7 @@ import java.util.Set;
 @Service
 public class ResourceServiceImpl implements ResourceService {
     private final Mp3FileRepository mp3FileRepository;
+    private final SongServiceClient songServiceClient;
 
     @Override
     public byte[] findById(Long id) throws ResourceNotFoundException {
@@ -42,33 +45,35 @@ public class ResourceServiceImpl implements ResourceService {
     }
 
     @Override
-    public Mp3FileMetadata parseMp3FileMetadata(InputStream is) throws InvalidResourceException {
-        BodyContentHandler handler = new BodyContentHandler();
-        Metadata metadata = new Metadata();
-        Mp3Parser mp3Parser = new Mp3Parser();
-        ParseContext context = new ParseContext();
+    public Long save(InputStream is) throws InvalidResourceException {
+        Mp3FileMetadata metadata = parseMp3FileMetadata(is);
+        Long mp3FileId = uploadMp3File(is);
 
-        try {
-            mp3Parser.parse(is, handler, metadata, context);
-        } catch (IOException | SAXException | TikaException e) {
-            log.error("Failed to parse mp3 file", e);
-            throw new InvalidResourceException(e);
+        if (mp3FileId != null) {
+            metadata.setResourceId(mp3FileId);
+            try {
+                songServiceClient.saveMetadata(metadata);
+            } catch (SongServiceClientException e) { //rollback resource service changes
+                mp3FileRepository.deleteById(mp3FileId);
+                mp3FileId = null;
+            }
         }
-
-        Mp3FileMetadata dto = Mp3FileMetadata.builder()
-                .title(metadata.get("dc:title"))
-                .artist(metadata.get("xmpDM:artist"))
-                .album(metadata.get("xmpDM:album"))
-                .length(Double.valueOf(metadata.get("xmpDM:duration")))
-                .year(metadata.getInt(Property.externalInteger("xmpDM:releaseDate")))
-                .build();
-
-        return dto;
+        return mp3FileId;
     }
 
     @Override
     @Transactional
-    public Long uploadMp3File(InputStream is) throws InvalidResourceException {
+    public Set<Long> deleteAll(Set<Long> ids) {
+        if(ids == null || ids.isEmpty()) {
+            return Set.of();
+        }
+        Set<Long> existingIds = mp3FileRepository.findExistingIds(ids);
+        mp3FileRepository.deleteAllByIdInBatch(ids);
+        return existingIds;
+    }
+
+    @Transactional
+    Long uploadMp3File(InputStream is) throws InvalidResourceException {
         SerialBlob blob;
         try {
             blob = new SerialBlob(is.readAllBytes());
@@ -84,17 +89,6 @@ public class ResourceServiceImpl implements ResourceService {
         return mp3File.getId();
     }
 
-    @Override
-    @Transactional
-    public Set<Long> deleteAll(Set<Long> ids) {
-        if(ids == null || ids.isEmpty()) {
-            return Set.of();
-        }
-        Set<Long> existingIds = mp3FileRepository.findExistingIds(ids);
-        mp3FileRepository.deleteAllByIdInBatch(ids);
-        return existingIds;
-    }
-
     @Transactional
     byte[] unwrapMp3FileData(Mp3File mp3File) {
         try {
@@ -105,5 +99,29 @@ public class ResourceServiceImpl implements ResourceService {
             log.error("Failed to convert mp3 file blob to byte array", e);
             return null;
         }
+    }
+
+    private Mp3FileMetadata parseMp3FileMetadata(InputStream is) throws InvalidResourceException {
+        BodyContentHandler handler = new BodyContentHandler();
+        Metadata metadata = new Metadata();
+        Mp3Parser mp3Parser = new Mp3Parser();
+        ParseContext context = new ParseContext();
+
+        try {
+            mp3Parser.parse(is, handler, metadata, context);
+        } catch (IOException | SAXException | TikaException e) {
+            log.error("Failed to parse mp3 file", e);
+            throw new InvalidResourceException(e);
+        }
+
+        Mp3FileMetadata dto = Mp3FileMetadata.builder()
+                .name(metadata.get("dc:title"))
+                .artist(metadata.get("xmpDM:artist"))
+                .album(metadata.get("xmpDM:album"))
+                .length(Double.valueOf(metadata.get("xmpDM:duration")))
+                .year(metadata.getInt(Property.externalInteger("xmpDM:releaseDate")))
+                .build();
+
+        return dto;
     }
 }

@@ -28,8 +28,8 @@ public class SongServiceImpl implements SongService {
         return mapper.toDto(song.get());
     }
 
-    @Transactional
     @Override
+    @Transactional
     public Long save(SongDto dto) {
         Song song = mapper.toEntity(dto);
         songRepository.save(song);
