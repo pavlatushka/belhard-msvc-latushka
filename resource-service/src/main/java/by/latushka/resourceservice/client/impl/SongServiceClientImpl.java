@@ -30,7 +30,9 @@ public class SongServiceClientImpl implements SongServiceClient {
                             .build())
                     .bodyValue(metadata)
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                    .retrieve();
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
         } catch (Exception e) {
             log.error("Failed to send request to Song Service", e);
             throw new SongServiceClientException(e);
