@@ -3,6 +3,7 @@ package by.latushka.resourceservice.service.impl;
 import by.latushka.resourceservice.dto.Mp3FileMetadata;
 import by.latushka.resourceservice.entity.Mp3File;
 import by.latushka.resourceservice.exception.InvalidResourceException;
+import by.latushka.resourceservice.exception.ResourceNotFoundException;
 import by.latushka.resourceservice.repository.Mp3FileRepository;
 import by.latushka.resourceservice.service.ResourceService;
 import jakarta.transaction.Transactional;
@@ -32,35 +33,12 @@ public class ResourceServiceImpl implements ResourceService {
     private final Mp3FileRepository mp3FileRepository;
 
     @Override
-    public Optional<Mp3File> findById(Long id) {
-        return mp3FileRepository.findById(id);
-    }
-
-    @Override
-    @Transactional
-    public void deleteAll(Set<Long> ids) {
-        if(ids == null || ids.isEmpty()) {
-            return;
+    public byte[] findById(Long id) throws ResourceNotFoundException {
+        Optional<Mp3File> mp3File = mp3FileRepository.findById(id);
+        if(mp3File.isEmpty()) {
+            throw new ResourceNotFoundException();
         }
-        mp3FileRepository.deleteAllByIdInBatch(ids);
-    }
-
-    @Override
-    @Transactional
-    public Mp3File uploadMp3File(InputStream is) throws InvalidResourceException {
-        SerialBlob blob;
-        try {
-            blob = new SerialBlob(is.readAllBytes());
-        } catch (IOException | SQLException e) {
-            log.error("Failed to read mp3 file data", e);
-            throw new InvalidResourceException(e);
-        }
-
-        Mp3File mp3File = new Mp3File();
-        mp3File.setData(blob);
-        mp3FileRepository.save(mp3File);
-
-        return mp3File;
+        return unwrapMp3FileData(mp3File.get());
     }
 
     @Override
@@ -88,8 +66,35 @@ public class ResourceServiceImpl implements ResourceService {
         return dto;
     }
 
+    @Override
     @Transactional
-    public byte[] unwrapMp3FileData(Mp3File mp3File) {
+    public Long uploadMp3File(InputStream is) throws InvalidResourceException {
+        SerialBlob blob;
+        try {
+            blob = new SerialBlob(is.readAllBytes());
+        } catch (IOException | SQLException e) {
+            log.error("Failed to read mp3 file data", e);
+            throw new InvalidResourceException(e);
+        }
+
+        Mp3File mp3File = new Mp3File();
+        mp3File.setData(blob);
+        mp3FileRepository.save(mp3File);
+
+        return mp3File.getId();
+    }
+
+    @Override
+    @Transactional
+    public void deleteAll(Set<Long> ids) {
+        if(ids == null || ids.isEmpty()) {
+            return;
+        }
+        mp3FileRepository.deleteAllByIdInBatch(ids);
+    }
+
+    @Transactional
+    byte[] unwrapMp3FileData(Mp3File mp3File) {
         try {
             Blob blob = mp3File.getData();
             int blobLength = (int) blob.length();

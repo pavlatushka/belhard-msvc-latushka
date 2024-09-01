@@ -1,7 +1,6 @@
 package by.latushka.resourceservice.controller;
 
 import by.latushka.resourceservice.dto.Mp3FileMetadata;
-import by.latushka.resourceservice.entity.Mp3File;
 import by.latushka.resourceservice.exception.InvalidResourceException;
 import by.latushka.resourceservice.exception.ResourceNotFoundException;
 import by.latushka.resourceservice.service.ResourceService;
@@ -15,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 @Validated
@@ -28,21 +26,18 @@ public class ResourceController {
     @PostMapping(consumes = "audio/mpeg")
     public ResponseEntity<?> uploadResource(InputStream is) throws InvalidResourceException {
         Mp3FileMetadata metadata = resourceService.parseMp3FileMetadata(is);
-        Mp3File mp3File = resourceService.uploadMp3File(is);
+        Long mp3FileId = resourceService.uploadMp3File(is);
 
         //todo send metadata to Song Service
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(Map.of("id", mp3File.getId()));
+                .body(Map.of("id", mp3FileId));
     }
 
     @GetMapping(value = "/{id}", produces = "audio/mpeg")
     public ResponseEntity<byte[]> getResource(@PathVariable Long id) throws ResourceNotFoundException {
-        Optional<Mp3File> mp3File = resourceService.findById(id);
-        if(mp3File.isEmpty()) {
-            throw new ResourceNotFoundException();
-        }
-        return ResponseEntity.ok(resourceService.unwrapMp3FileData(mp3File.get()));
+        byte[] resourceData = resourceService.findById(id);
+        return ResponseEntity.ok(resourceData);
     }
 
     @DeleteMapping
