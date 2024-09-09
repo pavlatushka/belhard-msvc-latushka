@@ -3,22 +3,13 @@ package by.latushka.resourceservice.client.impl;
 import by.latushka.resourceservice.client.StorageClient;
 import by.latushka.resourceservice.exception.StorageClientException;
 import io.minio.*;
-import io.minio.errors.*;
-import io.minio.messages.DeleteError;
-import io.minio.messages.DeleteObject;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.List;
 
 @Log4j2
 @Component
@@ -40,6 +31,7 @@ public class MinIOStorageClientImpl implements StorageClient {
         PutObjectArgs args = PutObjectArgs.builder().bucket(bucketName).object(key)
                 .stream(is, object.length, -1).build();
         try {
+            log.info("Save object {} to MinIO", key);
             minioClient.putObject(args);
         } catch (Exception e) {
             log.error("Failed to save object to storage", e);
@@ -53,6 +45,7 @@ public class MinIOStorageClientImpl implements StorageClient {
         GetObjectResponse response;
         byte[] data;
         try {
+            log.info("Get object {} from MinIO", key);
             response = minioClient.getObject(args);
             data = response.readAllBytes();
         } catch (Exception e) {
@@ -66,6 +59,7 @@ public class MinIOStorageClientImpl implements StorageClient {
     public void delete(String key) {
         RemoveObjectArgs args = RemoveObjectArgs.builder().bucket(bucketName).object(key).build();
         try {
+            log.info("Remove object {} from MinIO", key);
             minioClient.removeObject(args);
         } catch (Exception e) {
             log.error("Failed to delete object from storage", e);
