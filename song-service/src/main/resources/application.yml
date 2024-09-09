@@ -1,17 +1,18 @@
 server:
-  port: 8081
   error:
     include-stacktrace: never
 spring:
+  application:
+    name: song-service
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
   datasource:
     driverClassName: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:54322/song
-    username: postgres
-    password: root
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
 logging:
   level:
     by.latushka: debug
