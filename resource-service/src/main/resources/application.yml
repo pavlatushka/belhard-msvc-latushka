@@ -25,6 +25,11 @@ song:
         scheme: http
         service-id: SONG-SERVICE
         endpoint: songs
+minio:
+  endpoint: http://minio-service:9000
+  access-key: ${MINIO_ACCESS_KEY}
+  secret-key: ${MINIO_SECRET_KEY}
+  bucket-name: mp3bucket
 logging:
   level:
     by.latushka: debug
