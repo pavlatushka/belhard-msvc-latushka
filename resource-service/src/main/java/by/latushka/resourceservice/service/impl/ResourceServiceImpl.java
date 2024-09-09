@@ -11,6 +11,7 @@ import by.latushka.resourceservice.repository.Mp3FileRepository;
 import by.latushka.resourceservice.service.ResourceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.TikaInputStream;
@@ -22,11 +23,8 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
-import javax.sql.rowset.serial.SerialBlob;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -79,6 +77,7 @@ public class ResourceServiceImpl implements ResourceService {
         return mp3FileId;
     }
 
+    @SneakyThrows
     @Override
     @Transactional
     public Set<Long> deleteAll(Set<Long> ids) {
@@ -86,11 +85,16 @@ public class ResourceServiceImpl implements ResourceService {
             return Set.of();
         }
         Set<Mp3File> files = mp3FileRepository.findExisting(ids);
-
         files.forEach(f -> storageClient.delete(f.getResourceId()));
 
-        mp3FileRepository.deleteAllByIdInBatch(ids);
-        return files.stream().map(Mp3File::getId).collect(Collectors.toSet());
+        Set<Long> existingIds = files.stream().map(Mp3File::getId).collect(Collectors.toSet());
+
+        if(!existingIds.isEmpty()) {
+            mp3FileRepository.deleteAllByIdInBatch(existingIds);
+            songServiceClient.deleteMetadata(existingIds);
+        }
+
+        return existingIds;
     }
 
     @Transactional

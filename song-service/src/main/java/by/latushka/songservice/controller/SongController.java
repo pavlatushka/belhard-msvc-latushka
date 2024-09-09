@@ -35,8 +35,14 @@ public class SongController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteSong(@RequestParam(required = false) @Size(max = 199) Set<Long> id) {
-        Set<Long> removedIds = songService.deleteAll(id);
+    public ResponseEntity<?> deleteSong(@RequestParam(required = false) @Size(max = 199) Set<Long> id,
+                                        @RequestParam(required = false) Boolean byResource) {
+        Set<Long> removedIds;
+        if(Boolean.TRUE.equals(byResource)) {
+            removedIds = songService.deleteAllByResourceId(id);
+        } else {
+            removedIds = songService.deleteAll(id);
+        }
         return ResponseEntity.ok(Map.of("id", removedIds));
     }
 }

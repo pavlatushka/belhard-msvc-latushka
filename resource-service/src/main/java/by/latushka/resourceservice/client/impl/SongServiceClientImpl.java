@@ -13,6 +13,8 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.Collection;
+
 @Log4j2
 @RequiredArgsConstructor
 @Component
@@ -35,6 +37,31 @@ public class SongServiceClientImpl implements SongServiceClient {
                             .path(properties.getEndpoint())
                             .build())
                     .bodyValue(metadata)
+                    .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+                    .retrieve()
+                    .bodyToMono(Object.class)
+                    .block();
+        } catch (Exception e) {
+            log.error("Failed to send request to Song Service", e);
+            throw new SongServiceClientException(e);
+        }
+    }
+
+    @Override
+    public void deleteMetadata(Collection<Long> ids) throws SongServiceClientException {
+        try {
+            ServiceInstance instance = loadBalancerClient.choose(properties.getServiceId());
+            log.info("Choose instance {} of {} with LoadBalancerClient", instance.getInstanceId(), instance.getServiceId());
+
+            log.debug("Sending request to delete metadata from Song Service: {}", ids);
+            webClient.delete()
+                    .uri(uri -> uri.scheme(properties.getScheme())
+                            .queryParam("id", ids)
+                            .queryParam("byResource", true)
+                            .host(instance.getHost())
+                            .port(instance.getPort())
+                            .path(properties.getEndpoint())
+                            .build())
                     .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                     .retrieve()
                     .bodyToMono(Object.class)
