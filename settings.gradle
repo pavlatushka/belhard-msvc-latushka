@@ -1,3 +1,4 @@
 rootProject.name = 'songcloud'
 include 'resource-service'
 include 'song-service'
+include 'service-discovery'

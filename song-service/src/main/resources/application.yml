@@ -13,6 +13,10 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL}
 logging:
   level:
     by.latushka: debug

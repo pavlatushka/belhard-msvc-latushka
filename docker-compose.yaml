@@ -8,9 +8,12 @@ services:
       - DATABASE_URL=jdbc:postgresql://resource-service-database:5432/${RESOURCE_DB_NAME}
       - DATABASE_USER=${RESOURCE_DB_USER}
       - DATABASE_PASSWORD=${RESOURCE_DB_PASSWORD}
+      - EUREKA_URL=${SERVICE_DISCOVERY_URL}
     restart: always
     depends_on:
+      - service-discovery
       - resource-service-database
+      - song-service
 
   song-service:
     build: ./song-service
@@ -20,9 +23,17 @@ services:
       - DATABASE_URL=jdbc:postgresql://song-service-database:5432/${SONG_DB_NAME}
       - DATABASE_USER=${SONG_DB_USER}
       - DATABASE_PASSWORD=${SONG_DB_PASSWORD}
+      - EUREKA_URL=${SERVICE_DISCOVERY_URL}
     restart: always
     depends_on:
+      - service-discovery
       - song-service-database
+
+  service-discovery:
+    build: ./service-discovery
+    ports:
+      - "8761:8761"
+    restart: always
 
   resource-service-database:
     image: postgres:16.1-bullseye
