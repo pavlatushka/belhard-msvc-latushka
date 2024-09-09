@@ -17,14 +17,17 @@ services:
 
   song-service:
     build: ./song-service
-    ports:
-      - "8082:8080"
+    expose:
+      - "8080"
     environment:
       - DATABASE_URL=jdbc:postgresql://song-service-database:5432/${SONG_DB_NAME}
       - DATABASE_USER=${SONG_DB_USER}
       - DATABASE_PASSWORD=${SONG_DB_PASSWORD}
       - EUREKA_URL=${SERVICE_DISCOVERY_URL}
     restart: always
+    deploy:
+      mode: replicated
+      replicas: 5
     depends_on:
       - service-discovery
       - song-service-database

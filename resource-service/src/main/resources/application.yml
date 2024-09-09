@@ -23,8 +23,7 @@ song:
   service:
     client:
         scheme: http
-        host: song-service
-        port: 8080
+        service-id: SONG-SERVICE
         endpoint: songs
 logging:
   level:

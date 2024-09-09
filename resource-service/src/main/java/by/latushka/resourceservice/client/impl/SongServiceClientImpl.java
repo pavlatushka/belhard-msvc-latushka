@@ -6,6 +6,8 @@ import by.latushka.resourceservice.dto.Mp3FileMetadata;
 import by.latushka.resourceservice.dto.SongServiceClientException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.cloud.client.ServiceInstance;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -17,15 +19,19 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class SongServiceClientImpl implements SongServiceClient {
     private final WebClient webClient;
     private final SongServiceClientProperties properties;
+    private final LoadBalancerClient loadBalancerClient;
 
     @Override
     public void saveMetadata(Mp3FileMetadata metadata) throws SongServiceClientException {
         try {
+            ServiceInstance instance = loadBalancerClient.choose(properties.getServiceId());
+            log.info("Choose instance {} of {} with LoadBalancerClient", instance.getInstanceId(), instance.getServiceId());
+
             log.debug("Sending request to save metadata in Song Service: {}", metadata);
             webClient.post()
                     .uri(uri -> uri.scheme(properties.getScheme())
-                            .host(properties.getHost())
-                            .port(properties.getPort())
+                            .host(instance.getHost())
+                            .port(instance.getPort())
                             .path(properties.getEndpoint())
                             .build())
                     .bodyValue(metadata)
