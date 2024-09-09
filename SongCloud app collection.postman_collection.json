@@ -17,7 +17,7 @@
 						"body": {
 							"mode": "file",
 							"file": {
-								"src": "/C:/Users/Pavel/Downloads/Iron Maiden - Fear Of The Dark.mp3"
+								"src": "/C:/Users/latushkopa/Downloads/file_Jingle Bells with Lyrics _ Kids Christmas Songs _ Christmas Carols 2018 (128 kbps).mp3"
 							}
 						},
 						"url": {
@@ -84,13 +84,13 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{resource-service-url}}/resources/38",
+							"raw": "{{resource-service-url}}/resources/2",
 							"host": [
 								"{{resource-service-url}}"
 							],
 							"path": [
 								"resources",
-								"38"
+								"2"
 							]
 						}
 					},
@@ -120,7 +120,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{resource-service-url}}/resources?id=14,15",
+							"raw": "{{resource-service-url}}/resources?id=1",
 							"host": [
 								"{{resource-service-url}}"
 							],
@@ -130,7 +130,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "14,15"
+									"value": "1"
 								}
 							]
 						}
@@ -143,7 +143,7 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{resource-service-url}}/resources?id=999,21,78",
+							"raw": "{{resource-service-url}}/resources?id=999,4,78",
 							"host": [
 								"{{resource-service-url}}"
 							],
@@ -153,7 +153,7 @@
 							"query": [
 								{
 									"key": "id",
-									"value": "999,21,78"
+									"value": "999,4,78"
 								}
 							]
 						}
