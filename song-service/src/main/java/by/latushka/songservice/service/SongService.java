@@ -11,4 +11,6 @@ public interface SongService {
     Long save(SongDto dto);
 
     Set<Long> deleteAll(Set<Long> ids);
+
+    Set<Long> deleteAllByResourceId(Set<Long> ids);
 }

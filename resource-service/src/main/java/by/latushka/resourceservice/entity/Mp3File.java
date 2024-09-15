@@ -12,6 +12,5 @@ import java.sql.Blob;
 @Entity
 @Table(name = "mp3_file")
 public class Mp3File extends BaseEntity<Long> {
-    @Lob
-    private Blob data;
+    private String resourceId;
 }

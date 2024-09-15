@@ -46,7 +46,17 @@ public class SongServiceImpl implements SongService {
             return Set.of();
         }
         Set<Long> existingIds = songRepository.findExistingIds(ids);
-        songRepository.deleteAllByIdInBatch(ids);
+        songRepository.deleteAllByIdInBatch(existingIds);
+        return existingIds;
+    }
+
+    @Override
+    public Set<Long> deleteAllByResourceId(Set<Long> ids) {
+        if(ids == null || ids.isEmpty()) {
+            return Set.of();
+        }
+        Set<Long> existingIds = songRepository.findExistingIdsByResourceIds(ids);
+        songRepository.deleteAllByIdInBatch(existingIds);
         return existingIds;
     }
 }

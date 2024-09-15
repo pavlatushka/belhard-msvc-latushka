@@ -8,21 +8,38 @@ services:
       - DATABASE_URL=jdbc:postgresql://resource-service-database:5432/${RESOURCE_DB_NAME}
       - DATABASE_USER=${RESOURCE_DB_USER}
       - DATABASE_PASSWORD=${RESOURCE_DB_PASSWORD}
+      - EUREKA_URL=${SERVICE_DISCOVERY_URL}
+      - MINIO_ACCESS_KEY=${STORAGE_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${STORAGE_SECRET_KEY}
     restart: always
     depends_on:
+      - service-discovery
       - resource-service-database
+      - minio-service
+      - song-service
 
   song-service:
     build: ./song-service
-    ports:
-      - "8082:8080"
+    expose:
+      - "8080"
     environment:
       - DATABASE_URL=jdbc:postgresql://song-service-database:5432/${SONG_DB_NAME}
       - DATABASE_USER=${SONG_DB_USER}
       - DATABASE_PASSWORD=${SONG_DB_PASSWORD}
+      - EUREKA_URL=${SERVICE_DISCOVERY_URL}
     restart: always
+    deploy:
+      mode: replicated
+      replicas: 2
     depends_on:
+      - service-discovery
       - song-service-database
+
+  service-discovery:
+    build: ./service-discovery
+    ports:
+      - "8761:8761"
+    restart: always
 
   resource-service-database:
     image: postgres:16.1-bullseye
@@ -47,6 +64,20 @@ services:
       - POSTGRES_USER=${SONG_DB_USER}
       - POSTGRES_PASSWORD=${SONG_DB_PASSWORD}
     restart: always
+
+  minio-service:
+    image: minio/minio:RELEASE.2024-08-29T01-40-52Z.fips
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio-service-storage:/data
+    environment:
+      - MINIO_ROOT_USER=${STORAGE_ACCESS_KEY}
+      - MINIO_ROOT_PASSWORD=${STORAGE_SECRET_KEY}
+    command: server /data --console-address ":9001"
+
 volumes:
   resource-service-database:
   song-service-database:
+  minio-service-storage:

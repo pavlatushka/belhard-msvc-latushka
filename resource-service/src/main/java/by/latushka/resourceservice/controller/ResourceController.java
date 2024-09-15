@@ -23,7 +23,7 @@ public class ResourceController {
 
     @PostMapping(consumes = "audio/mpeg")
     public ResponseEntity<?> addResource(InputStream is) throws InvalidResourceException {
-        Long resourceId = resourceService.save(is);
+        Long resourceId = resourceService.upload(is);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(Map.of("id", resourceId));
     }

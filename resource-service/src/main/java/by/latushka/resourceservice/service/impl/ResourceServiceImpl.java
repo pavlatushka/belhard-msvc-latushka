@@ -1,6 +1,7 @@
 package by.latushka.resourceservice.service.impl;
 
 import by.latushka.resourceservice.client.SongServiceClient;
+import by.latushka.resourceservice.client.StorageClient;
 import by.latushka.resourceservice.dto.Mp3FileMetadata;
 import by.latushka.resourceservice.dto.SongServiceClientException;
 import by.latushka.resourceservice.entity.Mp3File;
@@ -10,6 +11,7 @@ import by.latushka.resourceservice.repository.Mp3FileRepository;
 import by.latushka.resourceservice.service.ResourceService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.log4j.Log4j2;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.io.TikaInputStream;
@@ -21,13 +23,12 @@ import org.apache.tika.sax.BodyContentHandler;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
-import javax.sql.rowset.serial.SerialBlob;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Blob;
-import java.sql.SQLException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Log4j2
 @RequiredArgsConstructor
@@ -35,6 +36,7 @@ import java.util.Set;
 public class ResourceServiceImpl implements ResourceService {
     private final Mp3FileRepository mp3FileRepository;
     private final SongServiceClient songServiceClient;
+    private final StorageClient storageClient;
 
     @Override
     public byte[] findById(Long id) throws ResourceNotFoundException {
@@ -43,11 +45,12 @@ public class ResourceServiceImpl implements ResourceService {
             log.info("Resource with id {} not found", id);
             throw new ResourceNotFoundException();
         }
-        return unwrapMp3FileData(mp3File.get());
+
+        return storageClient.get(mp3File.get().getResourceId());
     }
 
     @Override
-    public Long save(InputStream is) throws InvalidResourceException {
+    public Long upload(InputStream is) throws InvalidResourceException {
         byte[] rawData;
         try {
             rawData = is.readAllBytes();
@@ -55,7 +58,11 @@ public class ResourceServiceImpl implements ResourceService {
             throw new InvalidResourceException(e);
         }
         Mp3FileMetadata metadata = parseMp3FileMetadata(rawData);
-        Long mp3FileId = uploadMp3File(rawData);
+
+        String resourceId = UUID.randomUUID().toString();
+
+        storageClient.put(resourceId, rawData);
+        Long mp3FileId = save(resourceId);
 
         if (mp3FileId != null) {
             metadata.setResourceId(mp3FileId);
@@ -70,44 +77,32 @@ public class ResourceServiceImpl implements ResourceService {
         return mp3FileId;
     }
 
+    @SneakyThrows
     @Override
     @Transactional
     public Set<Long> deleteAll(Set<Long> ids) {
         if(ids == null || ids.isEmpty()) {
             return Set.of();
         }
-        Set<Long> existingIds = mp3FileRepository.findExistingIds(ids);
-        mp3FileRepository.deleteAllByIdInBatch(ids);
+        Set<Mp3File> files = mp3FileRepository.findExisting(ids);
+        files.forEach(f -> storageClient.delete(f.getResourceId()));
+
+        Set<Long> existingIds = files.stream().map(Mp3File::getId).collect(Collectors.toSet());
+
+        if(!existingIds.isEmpty()) {
+            mp3FileRepository.deleteAllByIdInBatch(existingIds);
+            songServiceClient.deleteMetadata(existingIds);
+        }
+
         return existingIds;
     }
 
     @Transactional
-    Long uploadMp3File(byte[] data) throws InvalidResourceException {
-        SerialBlob blob;
-        try {
-            blob = new SerialBlob(data);
-        } catch (SQLException e) {
-            log.error("Failed to read mp3 file data", e);
-            throw new InvalidResourceException(e);
-        }
-
+    Long save(String resourceId) {
         Mp3File mp3File = new Mp3File();
-        mp3File.setData(blob);
+        mp3File.setResourceId(resourceId);
         mp3FileRepository.save(mp3File);
-
         return mp3File.getId();
-    }
-
-    @Transactional
-    byte[] unwrapMp3FileData(Mp3File mp3File) {
-        try {
-            Blob blob = mp3File.getData();
-            int blobLength = (int) blob.length();
-            return blob.getBytes(1, blobLength);
-        } catch (SQLException e) {
-            log.error("Failed to convert mp3 file blob to byte array", e);
-            return null;
-        }
     }
 
     private Mp3FileMetadata parseMp3FileMetadata(byte[] data) throws InvalidResourceException {
