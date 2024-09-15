@@ -13,10 +13,19 @@ spring:
     url: ${DATABASE_URL}
     username: ${DATABASE_USER}
     password: ${DATABASE_PASSWORD}
+  rabbitmq:
+    host: message-broker
+    username: ${BROKER_USERNAME}
+    password: ${BROKER_PASSWORD}
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL}
+message:
+  broker:
+    exchange: ${BROKER_EXCHANGE}
+    routing-key: ${BROKER_ROTING_KEY}
+    queue: ${BROKER_QUEUE}
 logging:
   level:
     by.latushka: debug

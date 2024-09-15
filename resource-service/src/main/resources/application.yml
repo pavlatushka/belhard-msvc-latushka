@@ -34,4 +34,5 @@ logging:
 message:
   broker:
     exchange: ${BROKER_EXCHANGE}
-    routing-key: ${BROKER_ROTING_KEY}
+    upload-routing-key: ${BROKER_UPLOAD_ROTING_KEY}
+    delete-routing-key: ${BROKER_DELETE_ROTING_KEY}

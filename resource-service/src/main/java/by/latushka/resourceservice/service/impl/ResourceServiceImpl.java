@@ -54,7 +54,7 @@ public class ResourceServiceImpl implements ResourceService {
         Long mp3FileId = save(resourceId);
 
         if (mp3FileId != null) {
-            messagePublisher.postMessage(mp3FileId);
+            messagePublisher.uploadMessage(mp3FileId);
         }
         return mp3FileId;
     }
@@ -73,6 +73,7 @@ public class ResourceServiceImpl implements ResourceService {
 
         if(!existingIds.isEmpty()) {
             mp3FileRepository.deleteAllByIdInBatch(existingIds);
+            messagePublisher.deleteMessage(existingIds);
         }
 
         return existingIds;

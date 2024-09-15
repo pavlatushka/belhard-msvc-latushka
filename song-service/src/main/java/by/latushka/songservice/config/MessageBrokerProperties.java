@@ -1,4 +1,4 @@
-package by.latushka.resourceservice.config;
+package by.latushka.songservice.config;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -9,6 +9,6 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties("message.broker")
 public class MessageBrokerProperties {
     private String exchange;
-    private String uploadRoutingKey;
-    private String deleteRoutingKey;
+    private String queue;
+    private String routingKey;
 }

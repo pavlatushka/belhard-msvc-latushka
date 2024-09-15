@@ -14,7 +14,8 @@ services:
       - BROKER_USERNAME=${MSG_BROKER_USERNAME}
       - BROKER_PASSWORD=${MSG_BROKER_PASSWORD}
       - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
-      - BROKER_ROTING_KEY=${MSG_BROKER_ROTING_KEY}
+      - BROKER_UPLOAD_ROTING_KEY=${MSG_BROKER_UPLOAD_ROTING_KEY}
+      - BROKER_DELETE_ROTING_KEY=${MSG_BROKER_DELETE_ROTING_KEY}
     restart: always
     depends_on:
       - service-discovery
@@ -31,11 +32,17 @@ services:
       - DATABASE_USER=${SONG_DB_USER}
       - DATABASE_PASSWORD=${SONG_DB_PASSWORD}
       - EUREKA_URL=${SERVICE_DISCOVERY_URL}
+      - BROKER_USERNAME=${MSG_BROKER_USERNAME}
+      - BROKER_PASSWORD=${MSG_BROKER_PASSWORD}
+      - BROKER_QUEUE=${MSG_BROKER_DELETE_QUEUE}
+      - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
+      - BROKER_ROTING_KEY=${MSG_BROKER_DELETE_ROTING_KEY}
     restart: always
-    deploy:
-      mode: replicated
-      replicas: 3
+#    deploy:
+#      mode: replicated
+#      replicas: 3
     depends_on:
+      - message-broker
       - service-discovery
       - song-service-database
 
@@ -47,13 +54,13 @@ services:
       - EUREKA_URL=${SERVICE_DISCOVERY_URL}
       - BROKER_USERNAME=${MSG_BROKER_USERNAME}
       - BROKER_PASSWORD=${MSG_BROKER_PASSWORD}
-      - BROKER_QUEUE=${MSG_BROKER_QUEUE}
+      - BROKER_QUEUE=${MSG_BROKER_UPLOAD_QUEUE}
       - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
-      - BROKER_ROTING_KEY=${MSG_BROKER_ROTING_KEY}
+      - BROKER_ROTING_KEY=${MSG_BROKER_UPLOAD_ROTING_KEY}
     restart: always
-    deploy:
-      mode: replicated
-      replicas: 3
+#    deploy:
+#      mode: replicated
+#      replicas: 3
     depends_on:
       - service-discovery
       - resource-service
