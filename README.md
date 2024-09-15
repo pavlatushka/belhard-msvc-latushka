@@ -7,6 +7,7 @@ Local ports usage:
   - Resource Service DB: 54321
   - Song Service DB: 54322
   - Object storage (MinIO): 9000 and 9001
+  - Message broker UI (RabbitMQ): 15672
 ```
 
 ### Installation

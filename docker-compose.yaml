@@ -38,9 +38,9 @@ services:
       - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
       - BROKER_ROTING_KEY=${MSG_BROKER_DELETE_ROTING_KEY}
     restart: always
-#    deploy:
-#      mode: replicated
-#      replicas: 3
+    deploy:
+      mode: replicated
+      replicas: 3
     depends_on:
       - message-broker
       - service-discovery
@@ -58,9 +58,9 @@ services:
       - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
       - BROKER_ROTING_KEY=${MSG_BROKER_UPLOAD_ROTING_KEY}
     restart: always
-#    deploy:
-#      mode: replicated
-#      replicas: 3
+    deploy:
+      mode: replicated
+      replicas: 3
     depends_on:
       - service-discovery
       - resource-service
