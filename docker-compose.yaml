@@ -11,12 +11,17 @@ services:
       - EUREKA_URL=${SERVICE_DISCOVERY_URL}
       - MINIO_ACCESS_KEY=${STORAGE_ACCESS_KEY}
       - MINIO_SECRET_KEY=${STORAGE_SECRET_KEY}
+      - BROKER_USERNAME=${MSG_BROKER_USERNAME}
+      - BROKER_PASSWORD=${MSG_BROKER_PASSWORD}
+      - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
+      - BROKER_ROTING_KEY=${MSG_BROKER_ROTING_KEY}
     restart: always
     depends_on:
       - service-discovery
       - resource-service-database
       - minio-service
       - song-service
+      - message-broker
 
   song-service:
     build: ./song-service
@@ -77,7 +82,15 @@ services:
       - MINIO_ROOT_PASSWORD=${STORAGE_SECRET_KEY}
     command: server /data --console-address ":9001"
 
+  message-broker:
+    image: rabbitmq:3.12.14-management
+    ports:
+      - "15672:15672"
+    volumes:
+      - message-broker-volume:/var/lib/rabbitmq
+
 volumes:
   resource-service-database:
   song-service-database:
   minio-service-storage:
+  message-broker-volume:
