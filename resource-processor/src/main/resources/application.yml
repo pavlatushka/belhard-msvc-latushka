@@ -17,3 +17,15 @@ message:
     exchange: ${BROKER_EXCHANGE}
     routing-key: ${BROKER_ROTING_KEY}
     queue: ${BROKER_QUEUE}
+resource:
+  service:
+    client:
+      scheme: http
+      service-id: RESOURCE-SERVICE
+      endpoint: resources/{id}
+song:
+  service:
+    client:
+      scheme: http
+      service-id: SONG-SERVICE
+      endpoint: songs

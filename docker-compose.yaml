@@ -32,9 +32,9 @@ services:
       - DATABASE_PASSWORD=${SONG_DB_PASSWORD}
       - EUREKA_URL=${SERVICE_DISCOVERY_URL}
     restart: always
-#    deploy:
-#      mode: replicated
-#      replicas: 3
+    deploy:
+      mode: replicated
+      replicas: 3
     depends_on:
       - service-discovery
       - song-service-database
@@ -51,13 +51,13 @@ services:
       - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
       - BROKER_ROTING_KEY=${MSG_BROKER_ROTING_KEY}
     restart: always
-#    deploy:
-#      mode: replicated
-#      replicas: 3
+    deploy:
+      mode: replicated
+      replicas: 3
     depends_on:
+      - service-discovery
       - resource-service
       - song-service
-      - service-discovery
       - message-broker
 
   service-discovery:

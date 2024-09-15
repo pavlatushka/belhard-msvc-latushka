@@ -23,12 +23,6 @@ eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL}
-song:
-  service:
-    client:
-        scheme: http
-        service-id: SONG-SERVICE
-        endpoint: songs
 minio:
   endpoint: http://minio-service:9000
   access-key: ${MINIO_ACCESS_KEY}

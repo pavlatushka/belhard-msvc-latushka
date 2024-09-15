@@ -4,17 +4,11 @@ import io.minio.MinioClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Configuration
 @RequiredArgsConstructor
-public class AppConfig {
+public class MinIOConfig {
     private final MinIOStorageClientConfig cfg;
-
-    @Bean
-    public WebClient webClient() {
-        return WebClient.builder().build();
-    }
 
     @Bean
     public MinioClient minioClient() {
