@@ -3,4 +3,17 @@ server:
     include-stacktrace: never
 spring:
   application:
-  name: resource-processor
+    name: resource-processor
+  rabbitmq:
+    host: message-broker
+    username: ${BROKER_USERNAME}
+    password: ${BROKER_PASSWORD}
+eureka:
+  client:
+    service-url:
+      defaultZone: ${EUREKA_URL}
+message:
+  broker:
+    exchange: ${BROKER_EXCHANGE}
+    routing-key: ${BROKER_ROTING_KEY}
+    queue: ${BROKER_QUEUE}

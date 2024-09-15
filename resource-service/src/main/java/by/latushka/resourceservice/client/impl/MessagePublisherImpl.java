@@ -18,6 +18,6 @@ public class MessagePublisherImpl implements MessagePublisher {
     @Override
     public void postMessage(Object message) {
         log.info("Sending message: {}", message);
-        rabbitTemplate.convertAndSend(properties.getExchange(), properties.getRoutingKey(), message);
+        rabbitTemplate.convertAndSend(properties.getExchange(), properties.getRoutingKey() + "1", message);
     }
 }
