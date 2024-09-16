@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component;
 
 @Data
 @Component
-@ConfigurationProperties("song.service.client")
-public class SongServiceClientProperties {
-    private String scheme;
-    private String serviceId;
-    private String endpoint;
+@ConfigurationProperties("message.broker")
+public class MessageBrokerProperties {
+    private String exchange;
+    private String uploadRoutingKey;
+    private String deleteRoutingKey;
 }

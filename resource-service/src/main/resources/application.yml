@@ -15,16 +15,14 @@ spring:
     password: ${DATABASE_PASSWORD}
     hikari:
       auto-commit: false
+  rabbitmq:
+    host: message-broker
+    username: ${BROKER_USERNAME}
+    password: ${BROKER_PASSWORD}
 eureka:
   client:
     service-url:
       defaultZone: ${EUREKA_URL}
-song:
-  service:
-    client:
-        scheme: http
-        service-id: SONG-SERVICE
-        endpoint: songs
 minio:
   endpoint: http://minio-service:9000
   access-key: ${MINIO_ACCESS_KEY}
@@ -33,3 +31,8 @@ minio:
 logging:
   level:
     by.latushka: debug
+message:
+  broker:
+    exchange: ${BROKER_EXCHANGE}
+    upload-routing-key: ${BROKER_UPLOAD_ROTING_KEY}
+    delete-routing-key: ${BROKER_DELETE_ROTING_KEY}

@@ -1,11 +1,11 @@
-package by.latushka.resourceservice.dto;
+package by.latushka.resourceprocessor.dto;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Builder
 @Data
-public class Mp3FileMetadata {
+public class MetadataDto {
     private Long resourceId;
     private String name;
     private String artist;

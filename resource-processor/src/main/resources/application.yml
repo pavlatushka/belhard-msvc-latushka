@@ -3,16 +3,7 @@ server:
     include-stacktrace: never
 spring:
   application:
-    name: song-service
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
-  datasource:
-    driverClassName: org.postgresql.Driver
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USER}
-    password: ${DATABASE_PASSWORD}
+    name: resource-processor
   rabbitmq:
     host: message-broker
     username: ${BROKER_USERNAME}
@@ -26,6 +17,15 @@ message:
     exchange: ${BROKER_EXCHANGE}
     routing-key: ${BROKER_ROTING_KEY}
     queue: ${BROKER_QUEUE}
-logging:
-  level:
-    by.latushka: debug
+resource:
+  service:
+    client:
+      scheme: http
+      service-id: RESOURCE-SERVICE
+      endpoint: resources/{id}
+song:
+  service:
+    client:
+      scheme: http
+      service-id: SONG-SERVICE
+      endpoint: songs

@@ -3,7 +3,7 @@ services:
   resource-service:
     build: ./resource-service
     ports:
-      - "8081:8080"
+      - "8080:8080"
     environment:
       - DATABASE_URL=jdbc:postgresql://resource-service-database:5432/${RESOURCE_DB_NAME}
       - DATABASE_USER=${RESOURCE_DB_USER}
@@ -11,12 +11,17 @@ services:
       - EUREKA_URL=${SERVICE_DISCOVERY_URL}
       - MINIO_ACCESS_KEY=${STORAGE_ACCESS_KEY}
       - MINIO_SECRET_KEY=${STORAGE_SECRET_KEY}
+      - BROKER_USERNAME=${MSG_BROKER_USERNAME}
+      - BROKER_PASSWORD=${MSG_BROKER_PASSWORD}
+      - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
+      - BROKER_UPLOAD_ROTING_KEY=${MSG_BROKER_UPLOAD_ROTING_KEY}
+      - BROKER_DELETE_ROTING_KEY=${MSG_BROKER_DELETE_ROTING_KEY}
     restart: always
     depends_on:
       - service-discovery
       - resource-service-database
       - minio-service
-      - song-service
+      - message-broker
 
   song-service:
     build: ./song-service
@@ -27,13 +32,40 @@ services:
       - DATABASE_USER=${SONG_DB_USER}
       - DATABASE_PASSWORD=${SONG_DB_PASSWORD}
       - EUREKA_URL=${SERVICE_DISCOVERY_URL}
+      - BROKER_USERNAME=${MSG_BROKER_USERNAME}
+      - BROKER_PASSWORD=${MSG_BROKER_PASSWORD}
+      - BROKER_QUEUE=${MSG_BROKER_DELETE_QUEUE}
+      - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
+      - BROKER_ROTING_KEY=${MSG_BROKER_DELETE_ROTING_KEY}
     restart: always
     deploy:
       mode: replicated
-      replicas: 2
+      replicas: 3
     depends_on:
+      - message-broker
       - service-discovery
       - song-service-database
+
+  resource-processor:
+    build: ./resource-processor
+    expose:
+      - "8080"
+    environment:
+      - EUREKA_URL=${SERVICE_DISCOVERY_URL}
+      - BROKER_USERNAME=${MSG_BROKER_USERNAME}
+      - BROKER_PASSWORD=${MSG_BROKER_PASSWORD}
+      - BROKER_QUEUE=${MSG_BROKER_UPLOAD_QUEUE}
+      - BROKER_EXCHANGE=${MSG_BROKER_EXCHANGE}
+      - BROKER_ROTING_KEY=${MSG_BROKER_UPLOAD_ROTING_KEY}
+    restart: always
+    deploy:
+      mode: replicated
+      replicas: 3
+    depends_on:
+      - service-discovery
+      - resource-service
+      - song-service
+      - message-broker
 
   service-discovery:
     build: ./service-discovery
@@ -76,8 +108,18 @@ services:
       - MINIO_ROOT_USER=${STORAGE_ACCESS_KEY}
       - MINIO_ROOT_PASSWORD=${STORAGE_SECRET_KEY}
     command: server /data --console-address ":9001"
+    restart: always
+
+  message-broker:
+    image: rabbitmq:3.12.14-management
+    ports:
+      - "15672:15672"
+    volumes:
+      - message-broker-volume:/var/lib/rabbitmq
+    restart: always
 
 volumes:
   resource-service-database:
   song-service-database:
   minio-service-storage:
+  message-broker-volume:
